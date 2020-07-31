@@ -14,6 +14,7 @@ import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
 import Icon from 'react-native-vector-icons/Feather';
 import ImagePicker from 'react-native-image-picker';
+import ImageEditor from '@react-native-community/image-editor';
 
 import { useAuth } from '../../hooks/auth';
 import api from '../../services/api';
@@ -121,7 +122,7 @@ const SignUp: React.FC = () => {
         );
       }
     },
-    [navigation]
+    [navigation, updateUser]
   );
 
   const handleUpdateAvatar = useCallback(() => {
@@ -142,18 +143,20 @@ const SignUp: React.FC = () => {
           return;
         }
 
-        const source = { uri: response.uri };
-
         const data = new FormData();
 
         data.append('avatar', {
-          type: 'image/jpg',
-          name: `${user.id}`,
-          uri: responmse,
+          type: 'image/jpeg',
+          name: `${user.id}.jpeg`,
+          uri: response.uri,
+        });
+
+        api.patch('users/avatar', data).then((apiResponse) => {
+          updateUser(apiResponse.data);
         });
       }
     );
-  }, []);
+  }, [updateUser, user.id]);
 
   const handleGoBack = useCallback(() => {
     navigation.goBack();
